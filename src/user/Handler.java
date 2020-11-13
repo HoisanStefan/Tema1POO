@@ -14,16 +14,16 @@ import java.util.List;
 
 public class Handler {
     private List<ActorInputData> actors;
-    private List<UserInputData> users;
+    private List<UserInputData> usersAsInput;
     private List<ActionInputData> actions;
     private List<MovieInputData> movies;
     private List<SerialInputData> serials;
-    protected List<UserManager> Users = new ArrayList<UserManager>();
+    protected List<UserManager> users = new ArrayList<UserManager>();
 
-    public Handler() {}
+    public Handler() { }
 
     public Handler(final Input input) {
-        this.users = input.getUsers();
+        this.usersAsInput = input.getUsers();
         this.actions = input.getCommands();
         this.serials = input.getSerials();
     }
@@ -32,30 +32,39 @@ public class Handler {
      * Creating users
      */
     public void createUserInstances() {
-        for (UserInputData user : users) {
-            Users.add(new UserManager(user));
+        for (UserInputData user : usersAsInput) {
+            users.add(new UserManager(user));
         }
     }
 
-    public JSONObject createJsonElement(ActionInputData action) {
+    /**
+     *
+     * @param action
+     * @return
+     */
+    public JSONObject createJsonElement(final ActionInputData action) {
         JSONObject jo = new JSONObject();
         UserManager user = new UserManager();
 
-        switch(action.getActionType()) {
+        switch (action.getActionType()) {
             case "command":
-                switch(action.getType()) {
+                switch (action.getType()) {
                     case "favorite":
-                        jo = user.favorite(Users, action);
+                        jo = user.favorite(users, action);
                         break;
                     case "view":
-                        jo = user.view(Users, action);
-                        /*for (int i = 0; i < Users.size(); ++i) {
-                            if (Users.get(i).getUsername().equals("mildGelding9")) {
-                                System.out.println(Users.get(i).getHistory());
+                        jo = user.view(users, action);
+                        /*for (int i = 0; i < users.size(); ++i) {
+                            if (users.get(i).getUsername().equals("mildGelding9")) {
+                                System.out.println(users.get(i).getHistory());
                             }
                         }*/
                         break;
+                    default:
+                        break;
                 }
+                break;
+            default:
                 break;
         }
 
@@ -67,7 +76,7 @@ public class Handler {
      * @param result
      * @return
      */
-    public JSONArray handler(JSONArray result) {
+    public JSONArray handler(final JSONArray result) {
         createUserInstances();
         for (ActionInputData action : actions) {
             JSONObject jo;
