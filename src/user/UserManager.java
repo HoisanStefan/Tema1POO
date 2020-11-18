@@ -3,10 +3,41 @@ package user;
 import fileio.ActionInputData;
 import fileio.UserInputData;
 import org.json.simple.JSONObject;
+import video.VideoManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+class Pair {
+    private String title;
+    private Integer season;
+
+    @Override
+    public String toString() {
+        return "Pair{"
+                + "title='" + title + '\''
+                + ", season=" + season
+                + '}';
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public Integer getSeason() {
+        return season;
+    }
+
+    public void setTitle(final String title) {
+        this.title = title;
+    }
+
+    public void setSeason(final Integer season) {
+        this.season = season;
+    }
+}
 
 public final class UserManager extends Handler {
 
@@ -14,7 +45,8 @@ public final class UserManager extends Handler {
     private String username;
     private Map<String, Integer> history;
     private String subscriptionType;
-
+    private Map<Pair, Double> showsRatings;
+    private Map<String, Double> moviesRatings;
     public UserManager() { }
 
     public UserManager(final UserInputData user) {
@@ -22,6 +54,8 @@ public final class UserManager extends Handler {
         this.username = user.getUsername();
         this.history = user.getHistory();
         this.subscriptionType = user.getSubscriptionType();
+        this.showsRatings = new HashMap<>();
+        this.moviesRatings = new HashMap<>();
     }
 
     /*public UserManager whichUser(List<UserManager> Users, ActionInputData action) {
@@ -131,7 +165,83 @@ public final class UserManager extends Handler {
         message += value;
         jo.put("id", action.getActionId());
         jo.put("message", message);
-        
+
+        return jo;
+    }
+
+    /**
+     *
+     * @param users
+     * @param action
+     * @return
+     */
+    public JSONObject rating(final List<UserManager> users, final ActionInputData action) {
+        JSONObject jo = new JSONObject();
+        UserManager user;
+        VideoManager video = super.video;
+        //VideoManager video = new VideoManager(videoMoviesRated);
+
+        for (int i = 0; i < users.size(); ++i) {
+            user = users.get(i);
+            if (action.getUsername().equals(user.getUsername())) {
+                Map<String, Integer> historyNew = user.getHistory();
+                /**
+                 * If the user has seen the title already
+                 */
+                if (historyNew.containsKey(action.getTitle())) {
+                    /**
+                     * If we're dealing with a movie
+                     */
+                    if (action.getSeasonNumber() == 0) {
+                        Map<String, Double> moviesRatingsNew = user.getMoviesRatings();
+                        /**
+                         * If we haven't rated this movie before
+                         */
+                        if (!moviesRatingsNew.containsKey(action.getTitle())) {
+                            moviesRatingsNew.put(action.getTitle(), action.getGrade());
+                            user.setMoviesRatings(moviesRatingsNew);
+                            super.users = users;
+                            super.users.set(i, user);
+                            String message = "success -> ";
+                            message += action.getTitle() + " was rated with "
+                                    + action.getGrade() + " by " + action.getUsername();
+                            jo.put("id", action.getActionId());
+                            jo.put("message", message);
+                        }
+                        /**
+                         * Or else, we're dealing with a show
+                         */
+                    } else {
+                        Map<Pair, Double> showsRatingsNew = user.getShowsRatings();
+                        Pair key = new Pair();
+                        key.setTitle(action.getTitle());
+                        key.setSeason(action.getSeasonNumber());
+                        /**
+                         * If we haven't rated this season of the show already
+                         */
+                        if (!showsRatingsNew.containsKey(key)) {
+                            showsRatingsNew.put(key, action.getGrade());
+                            user.setShowsRatings(showsRatingsNew);
+                            super.users = users;
+                            super.users.set(i, user);
+                            String message = "success -> ";
+                            message += action.getTitle() + " was rated with "
+                                    + action.getGrade() + " by " + action.getUsername();
+                            jo.put("id", action.getActionId());
+                            jo.put("message", message);
+                        }
+                    }
+                } else {
+                    /**
+                     * If the user hasn't seen the movie yet
+                     */
+                    String message = "error -> " + action.getTitle() + " is not seen";
+                    jo.put("id", action.getActionId());
+                    jo.put("message", message);
+                }
+            }
+        }
+
         return jo;
     }
 
@@ -157,6 +267,22 @@ public final class UserManager extends Handler {
 
     public String getSubscriptionType() {
         return subscriptionType;
+    }
+
+    public Map<Pair, Double> getShowsRatings() {
+        return showsRatings;
+    }
+
+    public void setShowsRatings(final Map<Pair, Double> showsRatings) {
+        this.showsRatings = showsRatings;
+    }
+
+    public Map<String, Double> getMoviesRatings() {
+        return moviesRatings;
+    }
+
+    public void setMoviesRatings(final Map<String, Double> moviesRatings) {
+        this.moviesRatings = moviesRatings;
     }
 }
 

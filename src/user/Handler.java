@@ -8,6 +8,7 @@ import fileio.MovieInputData;
 import fileio.SerialInputData;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import video.VideoManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ public class Handler {
     private List<MovieInputData> movies;
     private List<SerialInputData> serials;
     protected List<UserManager> users = new ArrayList<UserManager>();
+    protected VideoManager video;
 
     public Handler() { }
 
@@ -26,6 +28,8 @@ public class Handler {
         this.usersAsInput = input.getUsers();
         this.actions = input.getCommands();
         this.serials = input.getSerials();
+        this.movies = input.getMovies();
+        this.video = new VideoManager();
     }
 
     /**
@@ -54,11 +58,24 @@ public class Handler {
                         break;
                     case "view":
                         jo = user.view(users, action);
-                        /*for (int i = 0; i < users.size(); ++i) {
-                            if (users.get(i).getUsername().equals("mildGelding9")) {
-                                System.out.println(users.get(i).getHistory());
-                            }
-                        }*/
+                        break;
+                    case "rating":
+                        jo = user.rating(users, action);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case "recommendation":
+                switch (action.getType()) {
+                    case "favorite":
+                        jo = video.favorite(users, action);
+                        break;
+                    case "standard":
+                        jo = video.standard(users, action, movies);
+                        break;
+                    case "best_unseen":
+                        jo = video.bestUnseen(users, action, movies);
                         break;
                     default:
                         break;
@@ -84,5 +101,13 @@ public class Handler {
             result.add(jo);
         }
         return result;
+    }
+
+    public final VideoManager getVideo() {
+        return video;
+    }
+
+    public final void setVideo(final VideoManager video) {
+        this.video = video;
     }
 }
