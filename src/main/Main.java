@@ -68,12 +68,13 @@ public final class Main {
                               final String filePath2) throws IOException {
         InputLoader inputLoader = new InputLoader(filePath1);
         Input input = inputLoader.readData();
+        Input input2 = inputLoader.readData();
 
         Writer fileWriter = new Writer(filePath2);
         JSONArray arrayResult = new JSONArray();
 
         //TODO add here the entry point to your implementation
-        Handler h = new Handler(input);
+        Handler h = new Handler(input, input2);
         arrayResult = h.handler(arrayResult);
         fileWriter.closeJSON(arrayResult);
     }

@@ -3,43 +3,60 @@ package user;
 import fileio.ActionInputData;
 import fileio.UserInputData;
 import org.json.simple.JSONObject;
-import video.VideoManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-class Pair {
-    private String title;
-    private Integer season;
-
-    @Override
-    public String toString() {
-        return "Pair{"
-                + "title='" + title + '\''
-                + ", season=" + season
-                + '}';
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public Integer getSeason() {
-        return season;
-    }
-
-    public void setTitle(final String title) {
-        this.title = title;
-    }
-
-    public void setSeason(final Integer season) {
-        this.season = season;
-    }
-}
+import java.util.Objects;
+import java.util.HashMap;
 
 public final class UserManager extends Handler {
+    public static final class Pair {
+        private String title;
+        private Integer season;
+
+        @Override
+        public String toString() {
+            return "Pair{"
+                    + "title='" + title + '\''
+                    + ", season=" + season
+                    + '}';
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Pair pair = (Pair) o;
+            return Objects.equals(title, pair.title)
+                    && Objects.equals(season, pair.season);
+        }
+
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(final String title) {
+            this.title = title;
+        }
+
+        public Integer getSeason() {
+            return season;
+        }
+
+        public void setSeason(final Integer season) {
+            this.season = season;
+        }
+    }
 
     private ArrayList<String> favMovies;
     private String username;
@@ -58,17 +75,6 @@ public final class UserManager extends Handler {
         this.moviesRatings = new HashMap<>();
     }
 
-    /*public UserManager whichUser(List<UserManager> Users, ActionInputData action) {
-        UserManager user = null;
-        for (int i = 0; i < Users.size(); ++i) {
-            if (action.getUsername().equals(Users.get(i).getUsername())) {
-                user = Users.get(i);
-                return user;
-            }
-        }
-        return user;
-    }*/
-
     /**
      * The process of adding a new title to the favorite list
      * @param users - a list with all the users
@@ -81,14 +87,14 @@ public final class UserManager extends Handler {
 
         for (int i = 0; i < users.size(); ++i) {
             UserManager user = users.get(i);
-            /**
-             * We search the user for whom the action is applied to
+            /*
+              We search the user for whom the action is applied to
              */
             if (action.getUsername().equals(user.getUsername())) {
                 Map<String, Integer> newHistory = user.getHistory();
-                /**
-                 * We search through the user's history in order to
-                 * find the occurrence of the movie title
+                /*
+                  We search through the user's history in order to
+                  find the occurrence of the movie title
                  */
                 if (newHistory.containsKey(action.getTitle())
                         && !user.getFavMovies().contains(action.getTitle())) {
@@ -99,9 +105,9 @@ public final class UserManager extends Handler {
                     super.users.set(i, user);
                     occurrence = 1;
                 }
-                /**
-                 * If we try to add a favorite video that's already in the
-                 * favorite list -> duplicate
+                /*
+                  If we try to add a favorite video that's already in the
+                  favorite list -> duplicate
                  */
                 if (newHistory.containsKey(action.getTitle())
                         && user.getFavMovies().contains(action.getTitle())
@@ -121,7 +127,7 @@ public final class UserManager extends Handler {
             message += action.getTitle() + " was added as favourite";
             jo.put("id", action.getActionId());
             jo.put("message", message);
-        } else if (occurrence == 2) {
+        } else {
             String message = "error -> ";
             message += action.getTitle() + " is already in favourite list";
             jo.put("id", action.getActionId());
@@ -178,24 +184,22 @@ public final class UserManager extends Handler {
     public JSONObject rating(final List<UserManager> users, final ActionInputData action) {
         JSONObject jo = new JSONObject();
         UserManager user;
-        VideoManager video = super.video;
-        //VideoManager video = new VideoManager(videoMoviesRated);
 
         for (int i = 0; i < users.size(); ++i) {
             user = users.get(i);
             if (action.getUsername().equals(user.getUsername())) {
                 Map<String, Integer> historyNew = user.getHistory();
-                /**
-                 * If the user has seen the title already
+                /*
+                  If the user has seen the title already
                  */
                 if (historyNew.containsKey(action.getTitle())) {
-                    /**
-                     * If we're dealing with a movie
+                    /*
+                      If we're dealing with a movie
                      */
                     if (action.getSeasonNumber() == 0) {
                         Map<String, Double> moviesRatingsNew = user.getMoviesRatings();
-                        /**
-                         * If we haven't rated this movie before
+                        /*
+                          If we haven't rated this movie before
                          */
                         if (!moviesRatingsNew.containsKey(action.getTitle())) {
                             moviesRatingsNew.put(action.getTitle(), action.getGrade());
@@ -207,19 +211,31 @@ public final class UserManager extends Handler {
                                     + action.getGrade() + " by " + action.getUsername();
                             jo.put("id", action.getActionId());
                             jo.put("message", message);
+                        } else {
+                            String message = "error -> ";
+                            message += action.getTitle() + " has been already rated";
+                            jo.put("id", action.getActionId());
+                            jo.put("message", message);
                         }
-                        /**
-                         * Or else, we're dealing with a show
+                        /*
+                          Or else, we're dealing with a show
                          */
                     } else {
                         Map<Pair, Double> showsRatingsNew = user.getShowsRatings();
                         Pair key = new Pair();
-                        key.setTitle(action.getTitle());
-                        key.setSeason(action.getSeasonNumber());
-                        /**
-                         * If we haven't rated this season of the show already
+                        key.title = action.getTitle();
+                        key.season = action.getSeasonNumber();
+                        int ok = 1;
+                        for (Map.Entry<Pair, Double> entry : showsRatingsNew.entrySet()) {
+                            if (entry.getKey().equals(key)) {
+                                ok = 0;
+                                break;
+                            }
+                        }
+                        /*
+                          If we haven't rated this season of the show already
                          */
-                        if (!showsRatingsNew.containsKey(key)) {
+                        if (ok == 1) {
                             showsRatingsNew.put(key, action.getGrade());
                             user.setShowsRatings(showsRatingsNew);
                             super.users = users;
@@ -229,11 +245,16 @@ public final class UserManager extends Handler {
                                     + action.getGrade() + " by " + action.getUsername();
                             jo.put("id", action.getActionId());
                             jo.put("message", message);
+                        } else {
+                            String message = "error -> ";
+                            message += action.getTitle() + " has been already rated";
+                            jo.put("id", action.getActionId());
+                            jo.put("message", message);
                         }
                     }
                 } else {
-                    /**
-                     * If the user hasn't seen the movie yet
+                    /*
+                      If the user hasn't seen the movie yet
                      */
                     String message = "error -> " + action.getTitle() + " is not seen";
                     jo.put("id", action.getActionId());
