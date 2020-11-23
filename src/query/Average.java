@@ -144,7 +144,7 @@ public class Average extends QueryManager {
             }
         }
 
-        ratingsStorage = ratingsStorage(users, filmography, shows, false);
+        ratingsStorage = ratingsStorage(users, filmography, shows);
 
         Map<String, ElMap> actorsAndTheirRatings = new HashMap<>();
         for (int i = 0; i < actors.size(); ++i) {

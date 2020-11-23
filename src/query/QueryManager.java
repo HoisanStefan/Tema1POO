@@ -122,14 +122,12 @@ public class QueryManager extends user.Handler {
      * @param users
      * @param filmography
      * @param shows
-     * @param flag
      * @return
      */
     public Map<String, Average.ElMap> ratingsStorage(final List<UserManager> users,
                                                      final List<String> filmography,
-                                                     final List<SerialInputData> shows,
-                                                     final boolean flag) {
+                                                     final List<SerialInputData> shows) {
         RatingsStorage rs = new RatingsStorage();
-        return rs.ratingsStorage(users, filmography, shows, flag);
+        return rs.ratingsStorage(users, filmography, shows);
     }
 }

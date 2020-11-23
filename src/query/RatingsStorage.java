@@ -18,8 +18,7 @@ public class RatingsStorage extends QueryManager {
      */
     public Map<String, Average.ElMap> ratingsStorage(final List<UserManager> users,
                                                      final List<String> filmography,
-                                                     final List<SerialInputData> shows,
-                                                     final boolean flag) {
+                                                     final List<SerialInputData> shows) {
         Map<String, Average.ElMap> ratingsStorage = new HashMap<>();
         UserManager lastUser = users.get(0);
         for (int i = 0; i < users.size(); ++i) {
@@ -53,7 +52,6 @@ public class RatingsStorage extends QueryManager {
                     }
 
                     for (int j = 0; j <= numberOfSeasons && j != key.getSeason(); ++j) {
-                        UserManager temp = new UserManager();
                         UserManager.Pair key2 = new UserManager.Pair();
                         key2.setSeason(j);
                         key2.setTitle(entry.getKey().getTitle());
@@ -81,17 +79,6 @@ public class RatingsStorage extends QueryManager {
                         newValue.setRatings(value);
                         ratingsStorage.put(key.getTitle(), newValue);
                     }
-                }
-            }
-        }
-
-        if (flag) {
-            for (String title : filmography) {
-                if (!ratingsStorage.containsKey(title)) {
-                    Average.ElMap value = new Average.ElMap();
-                    value.setNrOfRatings(1);
-                    value.setRatings(0);
-                    ratingsStorage.put(title, value);
                 }
             }
         }

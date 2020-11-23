@@ -107,7 +107,7 @@ public class Rating extends QueryManager {
             filmography = getShowsFilmography(shows, action);
         }
 
-        ratingsStorage = ratingsStorage(users, filmography, shows, true);
+        ratingsStorage = ratingsStorage(users, filmography, shows);
         for (Map.Entry<String, Average.ElMap> entry : ratingsStorage.entrySet()) {
             Average.ElPQ el = new Average.ElPQ();
             Average.ElMap value = entry.getValue();
